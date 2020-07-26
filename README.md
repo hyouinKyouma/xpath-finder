@@ -6,14 +6,18 @@ https://addons.mozilla.org/addon/xpath_finder/
 
 https://chrome.google.com/webstore/detail/xpath-finder/ihnknokegkbpmofmafnkoadfjkhlogph
 
+## Description
+The above repo was forked from the original repo xpath Finder created by Tomasz Rembacz, here I have modified the repo for giving relative xpaths that can be used for scraping.The follwing repo will only work for FIREFOX as sidebars are not supported by chrome.
+
 ## Options
 ![](https://i.imgur.com/4rJqlpp.png)
 
-## Usage
-1. Click on the plugin icon, cursor will be changed to the **crosshair**
-2. Hover over the desired element **(elements are highlighted on hover)**
-3. Click on the element and his xPath will display in the panel at the bottom of the page
 
+## Usage
+1. Click on the show sidebars option on the firefox browser
+2. Activate the browser plugin by clicking on the logo
+3. From the sidbar click activate and choose the attribute and click save
+4. Select the element in the main window.
 
 ![](http://i.imgur.com/dPQwezY.png)
 
@@ -27,12 +31,8 @@ https://chrome.google.com/webstore/detail/xpath-finder/ihnknokegkbpmofmafnkoadfj
 
 ![](https://i.imgur.com/1wOuAJq.png)
 
-## Description
-The above repo was forked from the original repo xpath Finder created by Tomasz Rembacz, here I have modified the repo for giving relative xpaths that can be used for scraping.The follwing repo will only work for FIREFOX as sidebars are not supported by chrome.
-## Usage
-1. Click on the show sidebars option on the firefox browser
-2. Activate the browser plugin by clicking on the logo
-3. From the sidbar click activate and choose the attribute and click save
-4. Select the element in the main window.
-
 ![](https://drive.google.com/file/d/1vvYze6iSzoMBBEXE-A1OpogJKmdt7yzt/view?usp=sharing)
+
+
+
+
