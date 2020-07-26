@@ -1,14 +1,19 @@
 {
   "manifest_version": 2,
-  "name": "xPath Finder",
+  "name": "xPath Finder experimental",
   "description": "Click on any element to get the xPath",
   "homepage_url": "https://github.com/trembacz/xpath-finder",
-  "version": "1.0.2",
+  "version": "1.0.40",
   "icons": {
     "64": "icons/default-64.png"
   },
   "background": {
     "scripts": ["background.js"]
+  },
+  "sidebar_action": {
+    "default_icon": "icons/star.png",
+    "default_title" : "Annotator",
+    "default_panel": "sidebar/panel.html"
   },
   "browser_action": {
     "default_icon": "icons/default-64.png",
@@ -31,5 +36,5 @@
   "options_ui": {
     "page": "options.html"
   },
-  "permissions": ["activeTab","<all_urls>", "storage"]
+  "permissions": ["activeTab","<all_urls>", "storage","tabs"]
 }

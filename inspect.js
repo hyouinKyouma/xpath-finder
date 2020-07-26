@@ -18,11 +18,10 @@ var xPathFinder = xPathFinder || (() => {
       e.stopImmediatePropagation();
       e.preventDefault && e.preventDefault();
       e.stopPropagation && e.stopPropagation();
-
       if (e.target.id !== this.contentNode) {
-        this.XPath = this.getXPath(e.target);
-        const contentNode   = document.getElementById(this.contentNode);
-        const iframeNode    = window.frameElement || iframe;
+        this.XPath = this.getLocalStorage(e.target).then((data)=> { const newData = data
+        const contentNode = document.getElementById(this.contentNode);
+        const iframeNode = window.frameElement || iframe;
         const contentString = iframeNode ? `Iframe: ${this.getXPath(iframeNode)}<br/>XPath: ${this.XPath}` : this.XPath;
 
         if (contentNode) {
@@ -33,7 +32,8 @@ var xPathFinder = xPathFinder || (() => {
           contentHtml.id = this.contentNode;
           document.body.appendChild(contentHtml);
         }
-        this.options.clipboard && ( this.copyText(this.XPath) );
+        this.options.clipboard && (this.copyText(newData));
+      })
       }
     }
 
@@ -146,12 +146,12 @@ var xPathFinder = xPathFinder || (() => {
       }
       // add listeners for all frames and root
       document.addEventListener('click', this.getData, true);
-      this.options.inspector && ( document.addEventListener('mouseover', this.draw) );
+      this.options.inspector && (document.addEventListener('mouseover', this.draw));
       const frameLength = window.parent.frames.length
-      for (let i = 0 ; i < frameLength; i++) {
+      for (let i = 0; i < frameLength; i++) {
         let frame = window.parent.frames[i];
         frame.document.addEventListener('click', e => this.getData(e, frame.frameElement), true);
-        this.options.inspector && (frame.document.addEventListener('mouseover', this.draw) );
+        this.options.inspector && (frame.document.addEventListener('mouseover', this.draw));
       }
 
     }
@@ -167,14 +167,14 @@ var xPathFinder = xPathFinder || (() => {
       contentNode && contentNode.remove();
       // remove listeners for all frames and root
       document.removeEventListener('click', this.getData, true);
-      this.options && this.options.inspector && ( document.removeEventListener('mouseover', this.draw) );
+      this.options && this.options.inspector && (document.removeEventListener('mouseover', this.draw));
       const frameLength = window.parent.frames.length
-      for (let i = 0 ; i < frameLength; i++) {
+      for (let i = 0; i < frameLength; i++) {
         let frameDocument = window.parent.frames[i].document
         frameDocument.removeEventListener('click', this.getData, true);
-        this.options && this.options.inspector && ( frameDocument.removeEventListener('mouseover', this.draw) );
+        this.options && this.options.inspector && (frameDocument.removeEventListener('mouseover', this.draw));
       }
-      
+
     }
 
     getXPath(el) {
@@ -183,6 +183,8 @@ var xPathFinder = xPathFinder || (() => {
         return `//*[@id="${nodeElem.id}"]`;
       }
       const parts = [];
+      // initiated new array
+      const partsClass = [];
       while (nodeElem && nodeElem.nodeType === Node.ELEMENT_NODE) {
         let nbOfPreviousSiblings = 0;
         let hasNextSiblings = false;
@@ -203,11 +205,95 @@ var xPathFinder = xPathFinder || (() => {
         }
         const prefix = nodeElem.prefix ? nodeElem.prefix + ':' : '';
         const nth = nbOfPreviousSiblings || hasNextSiblings ? `[${nbOfPreviousSiblings + 1}]` : '';
+         
+        // push all the elements it the tree backwards with classes
+         const currentNodeClass = nodeElem.classList.value;
+
+       
+       
+        if (currentNodeClass != '') {
+          partsClass.push(prefix + nodeElem.localName + `[@class='${currentNodeClass}']`)
+        } else {
+          partsClass.push(prefix + nodeElem.localName)
+        }
+        
         parts.push(prefix + nodeElem.localName + nth);
         nodeElem = nodeElem.parentNode;
+       
+        let resRelXpath = this.checkForClass(partsClass)
+        // analyze the no of elements based on xpath
+        // var resultA = this.doc.evaluate(
+        //   resRelXpath, // XPath expression
+        //   this.doc, // context node
+        //   null, // namespace resolver
+        //   XPathResult.ORDERED_NODE_SNAPSHOT_TYPE
+        // );
+        // for (var k = 0; k < resultA.snapshotLength; k++) {
+        //   var node = resultA.snapshotItem(k);
+        //   console.log("nodeType===>", node.nodeValue);
+        // }
+        // console.log(getLocalStorage(resRelXpath))
+        return resRelXpath
+
       }
-      return parts.length ? '/' + parts.reverse().join('/') : '';
+      
+
+
+      // return parts.length ? '/' + parts.reverse().join('/') : '';
     }
+    getLocalStorage(el){
+      let oldpath = this.getXPath(el)
+      browser.storage.local.get().then((result)=>{
+        let x = oldpath + result.attVal
+        console.log(x)
+        return x
+      })
+    }
+    // async getLocalStorage(el){
+    //     const xp = this.getXPath(el)
+    //     try{
+    //       const storage = await browser.storage.local.get()
+    //       const newXpath = xp + storage.attVal
+    //       console.log(newXpath)
+    //       return newXpath
+    //     }catch(err){
+    //       console.log(err)
+    //       return err
+    //     }
+    //   }
+
+    // 
+    checkForClass(classArr) {
+      let classappeared = false
+      let nwClassArr = classArr
+      nwClassArr = nwClassArr.reverse()
+      console.log("nw class array", nwClassArr)
+      var patt = /@class/;
+      let iter = nwClassArr.length - 1
+      let relXpath = ''
+
+      while (classappeared == false) {
+        var result = nwClassArr[iter].match(patt)
+        if(iter < 0){
+          return'/' + relXpath
+        }
+        else if (result != null) {
+          classappeared = true
+          relXpath = '/' + '/' + nwClassArr[iter] + relXpath
+          // console.log(nwClassArr[iter], "matched")
+          // console.log("relXpath", relXpath)
+          return relXpath
+        } else {
+          // console.log("nwClassArr[iter", nwClassArr[iter])
+          // console.log("relXpath", relXpath)
+          relXpath = '/' + nwClassArr[iter] + relXpath
+          // console.log("relXpath00", relXpath)
+          iter--
+          // console.log("not matched")
+        }
+      }
+    }
+    // 
 
     getElementDimensions(domElement) {
       const calculatedStyle = window.getComputedStyle(domElement);
